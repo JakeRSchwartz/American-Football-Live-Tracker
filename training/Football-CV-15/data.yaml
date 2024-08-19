@@ -1,0 +1,13 @@
+names:
+- football
+- players
+nc: 2
+roboflow:
+  license: CC BY 4.0
+  project: football-cv
+  url: https://universe.roboflow.com/mobile-web-research/football-cv/dataset/15
+  version: 15
+  workspace: mobile-web-research
+test: ../test/images
+train: Football-CV-15/train/images
+val: Football-CV-15/valid/images
