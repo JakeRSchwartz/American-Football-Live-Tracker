@@ -2,10 +2,13 @@ from ultralytics import YOLO  # type: ignore
 import supervision as sv
 import numpy as np
 from typing import List
+import pickle
+import os
+import cv2
 
 class Tracker:
     def __init__(self, model_path:str) -> None:
-        # Initialize YOLO model with the provided path
+        # Initialize YOLO 
         self.model = YOLO(model_path)
         # Initialize ByteTrack tracker from supervision library
         self.tracker = sv.ByteTrack()
@@ -23,7 +26,12 @@ class Tracker:
         
         return detections
     
-    def get_object_tracks(self, frames: List[np.ndarray]):
+    def get_object_tracks(self, frames: List[np.ndarray], read_from_stub=False, stub_path = None):
+
+        if read_from_stub and stub_path is not None and os.path.exists(stub_path):
+            with open(stub_path, 'rb') as f:
+                return pickle.load(f)
+
         # Detect objects in the frames
         detections = self.detect_frames(frames)
 
@@ -56,5 +64,10 @@ class Tracker:
                 else:
                     print("Unknown class ID")
             
-            # Debug print ASAP
-            print(detections_with_tracks)
+            if stub_path is not None:
+                # Save the tracks to a file
+                with open(stub_path, 'wb') as f:
+                    pickle.dump(tracks, f)
+            return tracks
+    def draw_annotations(frame, detections):
+        pass
