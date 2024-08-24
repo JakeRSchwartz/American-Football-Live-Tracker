@@ -63,7 +63,6 @@ class Tracker:
                 class_info = frame_d[5]  
                 cls_id = class_info['class_name']
                 track_id = frame_d[4]
-                print(f"Frame: {frame_num}, Class: {cls_id}, Track ID: {track_id}")
                 
                 if cls_id == 'players':
                     tracks["player"][frame_num][track_id] = {"bbox": bbox}
