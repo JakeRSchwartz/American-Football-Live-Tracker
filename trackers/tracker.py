@@ -58,14 +58,16 @@ class Tracker:
             tracks["football"].append({})
 
             for frame_d in detections_with_tracks:
+                print(frame_d)
                 bbox = frame_d[0].tolist()
-                cls_id = frame_d[1]
-                track_id = frame_d[2]
+                class_info = frame_d[5]  
+                cls_id = class_info['class_name']
+                track_id = frame_d[4]
                 print(f"Frame: {frame_num}, Class: {cls_id}, Track ID: {track_id}")
                 
-                if cls_id == cls_names_inverted.get('player'):
+                if cls_id == 'players':
                     tracks["player"][frame_num][track_id] = {"bbox": bbox}
-                elif cls_id == cls_names_inverted.get('football'):
+                elif cls_id == 'football':
                     tracks["football"][frame_num][track_id] = {"bbox": bbox}
                 else:
                     print(f"Unknown class ID: {cls_id}")
