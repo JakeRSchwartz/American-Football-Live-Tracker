@@ -21,11 +21,11 @@ def main():
     camera_movement_per_frames = camera_movement_estimation.get_camera_movement(video_frames,
                                                                                 read_from_stub=True,
                                                                                 stub_path='stubs/camera_movement_stub.pkl')
+    #Adjust object positions to camera movement
+    CameraMovementEstimator._adjust_pos_to_tracks(tracks, camera_movement_per_frames)
+
     view_transformer = ViewTransformer()
     view_transformer.transform(tracks)
-
-    #Adjust object positions to camera movement
-    tracker._adjust_pos_to_tracks(tracks, camera_movement_per_frames)
     
     #interpolate ball positions
     tracks['football'] = tracker.interpolate_ball_pos(tracks['football'])

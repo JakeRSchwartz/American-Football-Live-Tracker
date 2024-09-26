@@ -36,6 +36,7 @@ class CameraMovementEstimator():
                     tracks[object][frame_num][track_id]['position_adjusted'] = position_adjusted
 
 
+
     def get_camera_movement(self, frames, read_from_stub=False, stub_path=None):
 
         #read stub
