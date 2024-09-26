@@ -4,7 +4,7 @@ from utils import measure_distance, get_foot_position
 import cv2
 
 class SpeedAndDistance:
-    def __init__(self, speed, distance):
+    def __init__(self):
         self.frame_window = 5
         self.frame_rate = 24
 
