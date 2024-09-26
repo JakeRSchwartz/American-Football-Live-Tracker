@@ -3,11 +3,13 @@ import supervision as sv
 import numpy as np
 from typing import List
 import pickle
+import pandas as pd
 import os
 import cv2
 import sys
+import numpy as np
 sys.path.append('../')
-from utils import get_center_bbox, get_width_bbox
+from utils import get_center_bbox, get_width_bbox, get_foot_position
 
 
 class Tracker:
@@ -16,7 +18,30 @@ class Tracker:
         self.model = YOLO(model_path)
         # Initialize ByteTrack tracker from supervision library
         self.tracker = sv.ByteTrack()
-        pass
+    
+    def add_pos_to_tracks(self, tracks):
+        for object, object_tracks in tracks.items():
+            for frame_num, track in enumerate(object_tracks):
+                for track_id, track_info in track.items():
+                    bbox = track_info.get('bbox', [])
+                    if object == 'football':
+                        position = get_center_bbox(bbox)
+                    else:
+                        position = get_foot_position(bbox)
+                    tracks[object][frame_num][track_id]['position'] = position
+
+                
+
+    def interpolate_ball_pos(self, ball_positions):
+        ball_positions = [x.get(1,{}).get('bbox', []) for x in ball_positions]
+
+        df_ball_pos = pd.DataFrame(ball_positions, columns=['x1', 'y1', 'x2', 'y2'])
+        df_ball_pos = df_ball_pos.interpolate()
+        df_ball_pos = df_ball_pos.bfill()
+
+        ball_positions = [{1: {"bbox": x}} for x in df_ball_pos.to_numpy().tolist()]
+
+        return ball_positions
         
     def detect_frames(self, frames: List[np.ndarray]):
         batch_size = 8
@@ -78,9 +103,6 @@ class Tracker:
 
         return tracks
 
-
-
-        
     def draw_circle(self, frame, bbox, color, track_id=None):
         y2 = int(bbox[3])
 
@@ -123,6 +145,22 @@ class Tracker:
         return frame
             
         
+    
+    def draw_triangle(self, frame, bbox, color):
+        y = int(bbox[3])
+        x,_ = get_center_bbox(bbox)
+
+
+
+        triangle_points = np.array([
+            [x, y],
+            [x - 10, y + 20],
+            [x + 10, y + 20]
+        ])
+        cv2.drawCountours(frame, [triangle_points], 0, color, cv2.FILLED)
+        cv2.drawContours(frame, [triangle_points], 0, (0,0,0), 2)
+        return frame
+
     def draw_annotations(self, frame_v, tracks):
         output_video_frame = []
         for frame_num, frame in enumerate(frame_v):
@@ -137,7 +175,7 @@ class Tracker:
 
             # Draw footballs 
             for track_id, football in ball_dict.items():
-                frame_copy = self.draw_circle(frame_copy, football["bbox"], (0, 255, 0), track_id)
+                frame_copy = self.draw_triangle(frame_copy, football["bbox"], (0, 255, 0))
 
             output_video_frame.append(frame_copy)
 
